@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-black">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naija Auto Gleam - Design Approval</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* For carousel scrolling */
+        .snap-x { scroll-snap-type: x mandatory; }
+        .snap-y { scroll-snap-type: y mandatory; }
+        .snap-center { scroll-snap-align: center; }
+        .snap-start { scroll-snap-align: start; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .modal-enter { animation: fadeIn 0.3s ease-out; }
+        .modal-leave { animation: fadeOut 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
+        
+        /* Blinking animation */
+        .blinking {
+            animation: blinker 1.5s linear infinite;
+        }
+        @keyframes blinker {
+            50% {
+                opacity: 0.5;
+                transform: scale(0.98);
+            }
+        }
+        .action-btn-active { color: #ef4444; /* red-500 */ }
+    </style>
+</head>
+<body class="bg-black text-white flex justify-center items-start min-h-screen">
+
+    <div id="app-container" class="w-full max-w-md bg-black min-h-screen shadow-lg">
+
+        <!-- Disclaimer Modal -->
+        <div id="disclaimer-modal" class="fixed inset-0 bg-black bg-opacity-90 z-50 flex justify-center items-center p-4">
+            <div class="bg-gray-900 rounded-2xl p-6 md:p-8 text-center max-w-sm w-full modal-enter">
+                <h1 class="text-2xl font-bold mb-3">Welcome!</h1>
+                <p class="text-gray-400 mb-6">This is an interactive demo of your proposed Instagram account. It is not real, so please do not enter sensitive information. All content is for design approval only.</p>
+                <button id="understand-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors">I Understand, View My Demo</button>
+            </div>
+        </div>
+
+        <!-- Main Profile Page (Initially Hidden) -->
+        <main id="profile-page" class="hidden">
+            <!-- Header -->
+            <header class="p-4 flex items-center justify-between sticky top-0 bg-black z-10 border-b border-gray-800">
+                <div class="flex items-center space-x-2">
+                     <button id="open-admin-login-btn" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-cog text-xl"></i></button>
+                    <h1 id="profile-username-header" class="text-xl font-bold">@username</h1>
+                    <i class="fas fa-check-circle text-blue-500"></i>
+                </div>
+                 <button id="open-feedback-btn-header" class="bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-green-700 transition blinking">
+                    <i class="fas fa-paper-plane mr-2"></i>Submit Feedback
+                </button>
+            </header>
+
+            <!-- Profile Info -->
+            <section class="p-4">
+                <div class="flex items-center">
+                    <div class="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden p-0.5 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500">
+                        <img id="profile-pic" src="https://placehold.co/150x150/1A1A1A/FFFFFF?text=..." alt="Profile Picture" class="w-full h-full rounded-full object-cover border-2 border-black">
+                    </div>
+                    <div class="flex-1 ml-4 flex justify-around text-center">
+                        <div>
+                            <span id="posts-count" class="font-bold text-lg">0</span>
+                            <p class="text-gray-400 text-sm">Posts</p>
+                        </div>
+                        <div>
+                            <span id="followers-count" class="font-bold text-lg">...</span>
+                            <p class="text-gray-400 text-sm">Followers</p>
+                        </div>
+                        <div>
+                            <span id="following-count" class="font-bold text-lg">...</span>
+                            <p class="text-gray-400 text-sm">Following</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="profile-bio" class="mt-4">
+                    <!-- Bio loaded from state -->
+                </div>
+            </section>
+
+            <!-- Action Buttons -->
+            <section class="p-4 flex space-x-2">
+                <button class="flex-1 bg-gray-800 text-white font-semibold py-2 rounded-lg text-sm">Edit profile</button>
+                <button class="flex-1 bg-gray-800 text-white font-semibold py-2 rounded-lg text-sm">Share profile</button>
+            </section>
+            
+            <!-- Posts Grid -->
+            <nav class="border-t border-b border-gray-800 flex justify-around">
+                <button class="flex-1 text-center py-3 border-t-2 border-white"><i class="fas fa-th text-xl"></i></button>
+                <button class="flex-1 text-center py-3 text-gray-500"><i class="fas fa-film text-xl"></i></button>
+                <button class="flex-1 text-center py-3 text-gray-500"><i class="fas fa-user-tag text-xl"></i></button>
+            </nav>
+            <div id="posts-grid" class="grid grid-cols-3 gap-0.5">
+                <!-- Posts will be injected here from state -->
+            </div>
+             <footer class="text-center py-8 text-gray-600 text-xs">
+                &copy; 2025 Insta-Approval Demo
+            </footer>
+        </main>
+
+        <!-- Vertical Feed Gallery Modal -->
+        <div id="gallery-overlay" class="hidden fixed inset-0 bg-black z-40 overflow-y-scroll snap-y snap-mandatory no-scrollbar">
+            <button id="close-gallery-btn" class="fixed top-4 right-4 text-white text-3xl z-50">&times;</button>
+            <div id="gallery-feed-wrapper">
+                <!-- Gallery slides will be injected here from state -->
+            </div>
+        </div>
+
+        <!-- Feedback Form Modal -->
+        <div id="feedback-form-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center p-4">
+            <div id="feedback-form-content" class="bg-gray-900 rounded-2xl p-6 md:p-8 max-w-sm w-full relative modal-enter">
+                <button id="close-feedback-btn" class="absolute top-4 right-4 text-2xl text-gray-500">&times;</button>
+                <div id="feedback-form-step">
+                    <h2 class="text-2xl font-bold text-center mb-2">Almost Done!</h2>
+                    <p class="text-gray-400 text-center mb-6">Please provide your contact details so we can get the final approved designs to you and discuss the corrections for the others.</p>
+                    <form id="lead-form">
+                        <div class="mb-4"><label for="full-name" class="block text-sm font-medium text-gray-400 mb-2">Full Name</label><input type="text" id="full-name" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"></div>
+                        <div class="mb-6"><label for="phone-number" class="block text-sm font-medium text-gray-400 mb-2">Phone Number</label><input type="tel" id="phone-number" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"></div>
+                        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors">Send My Details</button>
+                    </form>
+                </div>
+                <div id="thank-you-step" class="hidden text-center">
+                    <div class="text-5xl text-green-500 mb-4"><i class="fas fa-check-circle"></i></div>
+                    <h2 class="text-2xl font-bold mb-2">Feedback Sent!</h2>
+                    <p class="text-gray-400">Thank you for your time. We have received your feedback and will be in touch shortly!</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Admin Password Modal -->
+        <div id="admin-password-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center p-4">
+             <div class="bg-gray-900 rounded-2xl p-6 md:p-8 max-w-sm w-full relative modal-enter">
+                <button id="close-admin-password-btn" class="absolute top-4 right-4 text-2xl text-gray-500">&times;</button>
+                <h2 class="text-2xl font-bold text-center mb-4">Admin Access</h2>
+                <form id="admin-login-form">
+                    <div class="mb-4"><label for="admin-password" class="block text-sm font-medium text-gray-400 mb-2">Password</label><input type="password" id="admin-password" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"></div>
+                    <p id="admin-error" class="text-red-500 text-sm text-center mb-4 hidden">Incorrect Password.</p>
+                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors">Login</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Admin Panel Modal -->
+        <div id="admin-panel-modal" class="hidden fixed inset-0 bg-black bg-opacity-95 z-50 p-4 overflow-y-auto">
+            <div class="bg-gray-900 rounded-2xl p-6 w-full max-w-3xl mx-auto my-8 relative modal-enter">
+                <button id="close-admin-panel-btn" class="absolute top-4 right-4 text-2xl text-gray-500">&times;</button>
+                <h2 class="text-3xl font-bold mb-6">Admin Panel</h2>
+                <div class="flex border-b border-gray-700 mb-6">
+                    <button class="admin-tab-btn active-tab px-4 py-2 text-white" data-tab="profile">Profile</button>
+                    <button class="admin-tab-btn px-4 py-2 text-gray-400" data-tab="content">Content</button>
+                    <button class="admin-tab-btn px-4 py-2 text-gray-400" data-tab="analytics">Analytics</button>
+                </div>
+                <div id="admin-tab-profile" class="admin-tab-content">
+                    <h3 class="text-xl font-semibold mb-4">Edit Profile Details</h3>
+                    <form id="admin-profile-form" class="space-y-4">
+                        <div><label class="block text-sm font-medium text-gray-400 mb-2">Username (without @)</label><input type="text" id="admin-username" class="admin-input"></div>
+                        <div><label class="block text-sm font-medium text-gray-400 mb-2">Profile Picture</label><input type="file" id="admin-profile-pic-file" class="admin-input" accept="image/*"></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-sm font-medium text-gray-400 mb-2">Followers</label><input type="text" id="admin-followers" class="admin-input"></div>
+                            <div><label class="block text-sm font-medium text-gray-400 mb-2">Following</label><input type="text" id="admin-following" class="admin-input"></div>
+                        </div>
+                        <div><label class="block text-sm font-medium text-gray-400 mb-2">Profile Bio (use line breaks)</label><textarea id="admin-bio" rows="6" class="admin-input"></textarea></div>
+                        <button id="save-profile-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg mt-4">Save Profile</button>
+                    </form>
+                </div>
+                <div id="admin-tab-content" class="admin-tab-content hidden">
+                    <h3 class="text-xl font-semibold mb-4">Manage Content</h3>
+                    <div id="admin-posts-list" class="space-y-2 max-h-96 overflow-y-auto pr-2 mb-4"></div>
+                    <button id="add-new-post-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg mt-4">Add New Post</button>
+                </div>
+                <div id="admin-tab-analytics" class="admin-tab-content hidden">
+                    <h3 class="text-xl font-semibold mb-4">Client Feedback Sessions</h3>
+                    <div id="analytics-container" class="space-y-4"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Post Editor Modal -->
+        <div id="post-editor-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-[60] flex justify-center items-center p-4">
+             <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-lg relative modal-enter">
+                <h3 id="post-editor-title" class="text-xl font-semibold mb-4">Edit Post</h3>
+                <form id="post-editor-form" class="space-y-4">
+                    <input type="hidden" id="post-editor-id">
+                    <div><label class="block text-sm font-medium text-gray-400 mb-2">Post Type</label><select id="post-editor-type" class="admin-input"><option value="image">Image</option><option value="reel">Reel</option><option value="carousel">Carousel</option></select></div>
+                    <div><label class="block text-sm font-medium text-gray-400 mb-2">Media Files (upload new to replace)</label><input type="file" id="post-editor-files" class="admin-input" accept="image/*,video/*" multiple></div>
+                    <div><label class="block text-sm font-medium text-gray-400 mb-2">Caption</label><textarea id="post-editor-caption" rows="4" class="admin-input"></textarea></div>
+                    <div><label class="block text-sm font-medium text-gray-400 mb-2">Fake Approvals</label><input type="text" id="post-editor-likes" class="admin-input"></div>
+                    <div class="flex space-x-4 pt-4"><button type="button" id="cancel-post-editor-btn" class="flex-1 bg-gray-600 text-white font-bold py-3 rounded-lg">Cancel</button><button type="submit" id="save-post-editor-btn" class="flex-1 bg-green-600 text-white font-bold py-3 rounded-lg">Save Post</button></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="delete-confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-[70] flex justify-center items-center p-4">
+            <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-sm text-center">
+                <h3 class="text-xl font-semibold mb-4">Are you sure?</h3><p class="text-gray-400 mb-6">This post will be permanently deleted. This action cannot be undone.</p>
+                <div class="flex space-x-4"><button id="cancel-delete-btn" class="flex-1 bg-gray-600 text-white font-bold py-3 rounded-lg">Cancel</button><button id="confirm-delete-btn" class="flex-1 bg-red-600 text-white font-bold py-3 rounded-lg">Yes, Delete</button></div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .admin-input{width:100%;background-color:#1f2937;border:1px solid #374151;border-radius:0.5rem;padding:0.5rem 0.75rem;color:white}.admin-input:focus{outline:none;box-shadow:0 0 0 2px #3b82f6}.active-tab{border-bottom:2px solid #3b82f6;color:#fff}input[type=file]::file-selector-button{background-color:#374151;color:#fff;border:none;padding:.5rem .75rem;border-radius:.25rem;cursor:pointer;margin-right:.75rem}input[type=file]::file-selector-button:hover{background-color:#4b5563}
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- App State & Data Management ---
+            let masterData;
+            let currentClientId = '';
+
+            const defaultData = {
+                profile: {
+                    username: "NaijaAutoGleam",
+                    picUrl: 'https://placehold.co/150x150/1A1A1A/FFFFFF?text=NG',
+                    followers: '11.4k',
+                    following: '58',
+                    bio: `Naija Auto Gleam ✨\nYour No. 1 Plug for Clean Foreign & Nigerian Used Cars 🚗\nTokunbo & Pre-owned Specialist\n💯 Accident-Free | Verified Mileage\n📍Lekki, Lagos 🇳🇬\n📞 DM or Call to book inspection!`
+                },
+                posts: [
+                    { id: 1, type: 'reel', media: ['https://placehold.co/600x750/000000/FFFFFF?text=G-Wagon+Reel'], caption: "The King has arrived. Our 2022 G-Wagon is ready for a new palace. DM for price. 👑 #GwagonNigeria #LagosLuxury", likes: 5432 },
+                    { id: 2, type: 'image', media: ['https://placehold.co/600x600/FFFFFF/000000?text=Lexus+RX+350'], caption: "Cleanliness is next to... this 2021 Tokunbo Lexus RX 350. Fullest option. Zero issues. Your new ride awaits. #LexusNigeria #TokunboCars", likes: 3123 },
+                    { id: 3, type: 'carousel', media: ['https://placehold.co/600x600/CCCCCC/000000?text=Before:+Dirty+Interior', 'https://placehold.co/600x600/FFFFFF/000000?text=After:+Sparkling+Clean'], caption: "We don't just sell cars, we restore them. Swipe to see the magic! ✨ #CarDetailingLagos #AutoMagic", likes: 1890 },
+                    { id: 4, type: 'image', media: ['https://placehold.co/600x600/1E40AF/FFFFFF?text=PRICE+DROP+ALERT!'], caption: "PRICE DROP ALERT! 📉 Unbeatable deal on this Toyota Camry (Muscle). Don't miss out! #PriceDrop #ToyotaCamry", likes: 2501 },
+                ],
+                analytics: {},
+            };
+
+            function loadMasterData() {
+                const storedData = localStorage.getItem('instaDemoMasterData');
+                masterData = storedData ? JSON.parse(storedData) : defaultData;
+            }
+
+            function saveMasterData() {
+                localStorage.setItem('instaDemoMasterData', JSON.stringify(masterData));
+            }
+
+            // DOM Elements
+            const disclaimerModal = document.getElementById('disclaimer-modal');
+            const understandBtn = document.getElementById('understand-btn');
+            const profilePage = document.getElementById('profile-page');
+            const postsGrid = document.getElementById('posts-grid');
+            const galleryOverlay = document.getElementById('gallery-overlay');
+            const galleryFeedWrapper = document.getElementById('gallery-feed-wrapper');
+            const closeGalleryBtn = document.getElementById('close-gallery-btn');
+            const feedbackFormModal = document.getElementById('feedback-form-modal');
+            const openFeedbackBtn = document.getElementById('open-feedback-btn-header');
+            const closeFeedbackBtn = document.getElementById('close-feedback-btn');
+            const leadForm = document.getElementById('lead-form');
+            const feedbackFormStep = document.getElementById('feedback-form-step');
+            const thankYouStep = document.getElementById('thank-you-step');
+            const adminPasswordModal = document.getElementById('admin-password-modal');
+            const openAdminLoginBtn = document.getElementById('open-admin-login-btn');
+            const closeAdminPasswordBtn = document.getElementById('close-admin-password-btn');
+            const adminLoginForm = document.getElementById('admin-login-form');
+            const adminPanelModal = document.getElementById('admin-panel-modal');
+            const closeAdminPanelBtn = document.getElementById('close-admin-panel-btn');
+            const adminTabs = document.querySelectorAll('.admin-tab-btn');
+            const adminTabContents = document.querySelectorAll('.admin-tab-content');
+            const saveProfileBtn = document.getElementById('save-profile-btn');
+            const postEditorModal = document.getElementById('post-editor-modal');
+            const postEditorForm = document.getElementById('post-editor-form');
+            const cancelPostEditorBtn = document.getElementById('cancel-post-editor-btn');
+            const addNewPostBtn = document.getElementById('add-new-post-btn');
+            const deleteConfirmModal = document.getElementById('delete-confirm-modal');
+            const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+            const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+
+            // --- Helper Functions ---
+            const fileToDataUrl = file => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+
+            // --- User Session & Analytics Logic ---
+            function initializeSession() {
+                let clientId = sessionStorage.getItem('instaDemoClientId');
+                if (!clientId) {
+                    clientId = crypto.randomUUID();
+                    sessionStorage.setItem('instaDemoClientId', clientId);
+                }
+                currentClientId = clientId;
+
+                if (!masterData.analytics[currentClientId]) {
+                    masterData.analytics[currentClientId] = { contact: null, feedback: {}, firstSeen: new Date().toISOString() };
+                    saveMasterData();
+                }
+            }
+
+            function recordFeedback(postId, status, comment = null) {
+                if (!masterData.analytics[currentClientId]) initializeSession();
+                const userFeedback = masterData.analytics[currentClientId].feedback;
+                
+                if (userFeedback[postId] && userFeedback[postId].status === status) {
+                    delete userFeedback[postId];
+                } else {
+                    userFeedback[postId] = { status: status, comment: comment, timestamp: new Date().toISOString() };
+                }
+                
+                saveMasterData();
+                updateAllUI();
+            }
+            
+            function updateFeedbackComment(postId, comment) {
+                const userFeedback = masterData.analytics[currentClientId]?.feedback;
+                if (userFeedback && userFeedback[postId] && userFeedback[postId].status === 'disapproved') {
+                    userFeedback[postId].comment = comment;
+                    saveMasterData();
+                }
+            }
+            
+            function updateAllUI() {
+                renderProfile();
+                renderGrid();
+                renderGallerySlides();
+            }
+
+            function renderProfile() {
+                const profile = masterData.profile;
+                document.getElementById('profile-username-header').textContent = `@${profile.username}`;
+                document.getElementById('profile-pic').src = profile.picUrl;
+                document.getElementById('posts-count').textContent = masterData.posts.length;
+                document.getElementById('followers-count').textContent = profile.followers;
+                document.getElementById('following-count').textContent = profile.following;
+                const bioHtml = profile.bio.split('\n').map((line, index) => 
+                    index === 0 ? `<h2 class="font-bold">${line}</h2>` : `<p class="text-sm text-gray-300">${line}</p>`
+                ).join('');
+                document.getElementById('profile-bio').innerHTML = bioHtml;
+            }
+
+            function renderGrid() {
+                postsGrid.innerHTML = '';
+                const userFeedback = masterData.analytics[currentClientId]?.feedback || {};
+                masterData.posts.forEach(post => {
+                    const postElement = document.createElement('div');
+                    postElement.className = 'aspect-square bg-gray-800 cursor-pointer relative';
+                    postElement.dataset.postId = post.id;
+                    const img = document.createElement('img');
+                    img.src = post.media[0];
+                    img.className = 'w-full h-full object-cover';
+                    postElement.appendChild(img);
+                    const feedback = userFeedback[post.id];
+                    const overlay = document.createElement('div');
+                    overlay.className = 'absolute inset-0 flex justify-center items-center text-4xl transition-opacity duration-300 opacity-0';
+                    if (feedback?.status === 'approved') {
+                        overlay.classList.add('bg-green-500/80', 'opacity-100');
+                        overlay.innerHTML = '<i class="fas fa-check-circle"></i>';
+                    } else if (feedback?.status === 'disapproved') {
+                        overlay.classList.add('bg-red-500/80', 'opacity-100');
+                        overlay.innerHTML = '<i class="fas fa-times-circle"></i>';
+                    }
+                    postElement.appendChild(overlay);
+                    postElement.addEventListener('click', () => openGallery(post.id));
+                    postsGrid.appendChild(postElement);
+                });
+            }
+
+            function renderGallerySlides() {
+                galleryFeedWrapper.innerHTML = '';
+                masterData.posts.forEach((post) => {
+                    const slide = document.createElement('section');
+                    slide.className = 'h-screen w-screen flex items-center justify-center snap-start';
+                    slide.id = `gallery-post-${post.id}`;
+                    let mediaContent = '';
+                    if (post.type === 'carousel') {
+                        mediaContent = `<div class="relative w-full aspect-square overflow-hidden"><div class="flex transition-transform duration-300 ease-in-out no-scrollbar snap-x carousel-wrapper">${post.media.map(src => `<div class="w-full flex-shrink-0 snap-center"><img src="${src}" class="w-full h-full object-cover"></div>`).join('')}</div>${post.media.length > 1 ? `<button class="carousel-prev absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-6 h-6 flex items-center justify-center">&lt;</button><button class="carousel-next absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-6 h-6 flex items-center justify-center">&gt;</button><div class="carousel-dots absolute bottom-3 left-1/2 -translate-x-1/2 flex space-x-1.5">${post.media.map((_, i) => `<div class="dot w-1.5 h-1.5 rounded-full ${i === 0 ? 'bg-white' : 'bg-white/50'}"></div>`).join('')}</div>` : ''}</div>`;
+                    } else if (post.type === 'reel') {
+                        mediaContent = `<div class="relative w-full aspect-[4/5] bg-black flex items-center justify-center"><img src="${post.media[0]}" class="max-w-full max-h-full object-contain"><div class="absolute inset-0 bg-black/20 flex justify-center items-center"><i class="fas fa-play text-white text-5xl opacity-80"></i></div></div>`;
+                    } else {
+                        mediaContent = `<div class="aspect-square"><img src="${post.media[0]}" class="w-full h-full object-cover"></div>`;
+                    }
+                    slide.innerHTML = `<div class="bg-black max-w-md w-full h-auto max-h-full flex flex-col my-auto"><div class="p-3 flex items-center"><img src="${masterData.profile.picUrl}" class="w-8 h-8 rounded-full border border-gray-600 profile-pic-small"><span class="font-bold ml-3 text-sm">@${masterData.profile.username}</span></div>${mediaContent}<div class="px-4 pt-2"><div class="flex items-center space-x-4 text-2xl"><button data-post-id="${post.id}" class="approve-btn transition-transform hover:scale-110"><i class="far fa-heart"></i></button><button data-post-id="${post.id}" class="disapprove-btn transition-transform hover:scale-110"><i class="far fa-thumbs-down"></i></button><i class="far fa-paper-plane text-white/80"></i></div><p class="text-sm font-semibold mt-2">${post.likes.toLocaleString()} approvals</p><div class="text-sm mt-2"><p><span class="font-bold">@${masterData.profile.username}</span> ${post.caption}</p></div><div class="comment-section mt-2 hidden"><input type="text" data-post-id="${post.id}" class="comment-input w-full bg-transparent border-b border-gray-700 py-1 text-sm placeholder-gray-500 focus:outline-none focus:border-gray-400" placeholder="Add a reason for disapproval..."></div></div></div>`;
+                    galleryFeedWrapper.appendChild(slide);
+                });
+                updateAllSlideButtonStates();
+            }
+
+            function updateAllSlideButtonStates() {
+                const userFeedback = masterData.analytics[currentClientId]?.feedback || {};
+                masterData.posts.forEach(post => {
+                    const slide = galleryFeedWrapper.querySelector(`#gallery-post-${post.id}`);
+                    if (!slide) return;
+                    const approveBtn = slide.querySelector(`.approve-btn`);
+                    const disapproveBtn = slide.querySelector(`.disapprove-btn`);
+                    const commentSection = slide.querySelector('.comment-section');
+                    const commentInput = slide.querySelector('.comment-input');
+                    const feedback = userFeedback[post.id];
+                    approveBtn.classList.remove('action-btn-active');
+                    approveBtn.innerHTML = '<i class="far fa-heart"></i>';
+                    disapproveBtn.classList.remove('action-btn-active');
+                    disapproveBtn.innerHTML = '<i class="far fa-thumbs-down"></i>';
+                    commentSection.classList.add('hidden');
+                    if (feedback?.status === 'approved') {
+                        approveBtn.classList.add('action-btn-active');
+                        approveBtn.innerHTML = '<i class="fas fa-heart"></i>';
+                    } else if (feedback?.status === 'disapproved') {
+                        disapproveBtn.classList.add('action-btn-active');
+                        disapproveBtn.innerHTML = '<i class="fas fa-thumbs-down"></i>';
+                        commentSection.classList.remove('hidden');
+                        commentInput.value = feedback.comment || '';
+                    }
+                });
+            }
+
+            function openGallery(postId) {
+                galleryOverlay.classList.remove('hidden'); document.body.style.overflow = 'hidden';
+                const targetPost = document.getElementById(`gallery-post-${postId}`);
+                if (targetPost) { targetPost.scrollIntoView({ behavior: 'instant' }); }
+            }
+            function closeGallery() { galleryOverlay.classList.add('hidden'); document.body.style.overflow = 'auto'; }
+
+            // --- Event Listeners ---
+            understandBtn.addEventListener('click', () => { disclaimerModal.classList.add('modal-leave'); setTimeout(() => { disclaimerModal.style.display = 'none'; profilePage.classList.remove('hidden'); }, 250); });
+            closeGalleryBtn.addEventListener('click', closeGallery);
+            galleryFeedWrapper.addEventListener('click', (e) => {
+                const approveBtn = e.target.closest('.approve-btn');
+                if (approveBtn) { recordFeedback(parseInt(approveBtn.dataset.postId), 'approved'); }
+                const disapproveBtn = e.target.closest('.disapprove-btn');
+                if (disapproveBtn) { recordFeedback(parseInt(disapproveBtn.dataset.postId), 'disapproved', ''); }
+            });
+            galleryFeedWrapper.addEventListener('change', (e) => {
+                if (e.target.classList.contains('comment-input')) {
+                    updateFeedbackComment(parseInt(e.target.dataset.postId), e.target.value);
+                }
+            });
+            openFeedbackBtn.addEventListener('click', () => { feedbackFormModal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; });
+            closeFeedbackBtn.addEventListener('click', () => { feedbackFormModal.classList.add('hidden'); document.body.style.overflow = 'auto'; });
+            leadForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const sessionData = masterData.analytics[currentClientId];
+                if (sessionData) {
+                    sessionData.contact = { name: document.getElementById('full-name').value, phone: document.getElementById('phone-number').value };
+                    sessionData.submittedAt = new Date().toISOString();
+                    saveMasterData();
+                }
+                feedbackFormStep.style.display = 'none';
+                thankYouStep.style.display = 'block';
+            });
+            openAdminLoginBtn.addEventListener('click', () => adminPasswordModal.classList.remove('hidden'));
+            closeAdminPasswordBtn.addEventListener('click', () => adminPasswordModal.classList.add('hidden'));
+            adminLoginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (document.getElementById('admin-password').value === 'admin123') {
+                    adminPasswordModal.classList.add('hidden'); document.getElementById('admin-password').value = ''; document.getElementById('admin-error').classList.add('hidden');
+                    openAdminPanel();
+                } else { document.getElementById('admin-error').classList.remove('hidden'); }
+            });
+
+            // --- Admin Panel Logic ---
+            function openAdminPanel() {
+                adminPanelModal.classList.remove('hidden');
+                loadProfileToAdmin();
+                renderAdminPostsList();
+                renderAnalytics();
+            }
+            closeAdminPanelBtn.addEventListener('click', () => adminPanelModal.classList.add('hidden'));
+            adminTabs.forEach(tab => tab.addEventListener('click', () => {
+                adminTabs.forEach(t => t.classList.remove('active-tab', 'text-white'));
+                tab.classList.add('active-tab', 'text-white');
+                adminTabContents.forEach(c => c.classList.add('hidden'));
+                document.getElementById(`admin-tab-${tab.dataset.tab}`).classList.remove('hidden');
+            }));
+
+            function loadProfileToAdmin() {
+                const profile = masterData.profile;
+                document.getElementById('admin-username').value = profile.username;
+                document.getElementById('admin-followers').value = profile.followers;
+                document.getElementById('admin-following').value = profile.following;
+                document.getElementById('admin-bio').value = profile.bio;
+            }
+            saveProfileBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const profilePicFile = document.getElementById('admin-profile-pic-file').files[0];
+                if (profilePicFile) { masterData.profile.picUrl = await fileToDataUrl(profilePicFile); }
+                masterData.profile.username = document.getElementById('admin-username').value;
+                masterData.profile.followers = document.getElementById('admin-followers').value;
+                masterData.profile.following = document.getElementById('admin-following').value;
+                masterData.profile.bio = document.getElementById('admin-bio').value;
+                saveMasterData();
+                updateAllUI();
+                alert('Profile saved!');
+            });
+            function renderAdminPostsList() {
+                const listEl = document.getElementById('admin-posts-list');
+                listEl.innerHTML = masterData.posts.map(post => `<div class="bg-gray-800 p-2 rounded-lg flex items-center justify-between"><div class="flex items-center"><img src="${post.media[0]}" class="w-10 h-10 object-cover rounded-md mr-3"><span class="text-sm">${post.id}: ${post.caption.substring(0, 40)}...</span></div><div><button class="edit-post-btn text-blue-400 mr-2" data-id="${post.id}"><i class="fas fa-edit"></i></button><button class="delete-post-btn text-red-400" data-id="${post.id}"><i class="fas fa-trash"></i></button></div></div>`).join('');
+                document.querySelectorAll('.edit-post-btn').forEach(btn => btn.addEventListener('click', (e) => openPostEditor(e.currentTarget.dataset.id)));
+                document.querySelectorAll('.delete-post-btn').forEach(btn => btn.addEventListener('click', (e) => deletePost(e.currentTarget.dataset.id)));
+            }
+            function openPostEditor(id) {
+                const postId = parseInt(id); const post = masterData.posts.find(p => p.id === postId); const isNew = !post;
+                postEditorForm.reset();
+                document.getElementById('post-editor-title').textContent = isNew ? 'Add New Post' : 'Edit Post';
+                document.getElementById('post-editor-id').value = isNew ? '' : post.id;
+                document.getElementById('post-editor-type').value = isNew ? 'image' : post.type;
+                document.getElementById('post-editor-caption').value = isNew ? '' : post.caption;
+                document.getElementById('post-editor-likes').value = isNew ? '1000' : post.likes;
+                postEditorModal.classList.remove('hidden');
+            }
+            addNewPostBtn.addEventListener('click', () => openPostEditor(null));
+            cancelPostEditorBtn.addEventListener('click', () => postEditorModal.classList.add('hidden'));
+            postEditorForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('post-editor-id').value; const files = document.getElementById('post-editor-files').files;
+                let mediaData = [];
+                if (files.length > 0) { mediaData = await Promise.all(Array.from(files).map(fileToDataUrl)); } 
+                else if (id) { mediaData = masterData.posts.find(p => p.id == id).media; }
+                if (mediaData.length === 0) { alert('Please upload at least one media file.'); return; }
+                const postData = { type: document.getElementById('post-editor-type').value, caption: document.getElementById('post-editor-caption').value, likes: parseInt(document.getElementById('post-editor-likes').value) || 0, media: mediaData };
+                if (id) {
+                    const postIndex = masterData.posts.findIndex(p => p.id == id);
+                    masterData.posts[postIndex] = { ...masterData.posts[postIndex], ...postData };
+                } else {
+                    postData.id = masterData.posts.length ? Math.max(...masterData.posts.map(p => p.id)) + 1 : 1;
+                    masterData.posts.push(postData);
+                }
+                saveMasterData(); updateAllUI(); renderAdminPostsList();
+                postEditorModal.classList.add('hidden');
+            });
+            function deletePost(id) { deleteConfirmModal.dataset.idToDelete = id; deleteConfirmModal.classList.remove('hidden'); }
+            confirmDeleteBtn.addEventListener('click', () => {
+                const id = deleteConfirmModal.dataset.idToDelete;
+                if (id) {
+                    masterData.posts = masterData.posts.filter(p => p.id != id);
+                    saveMasterData(); updateAllUI(); renderAdminPostsList();
+                }
+                deleteConfirmModal.classList.add('hidden');
+            });
+            cancelDeleteBtn.addEventListener('click', () => deleteConfirmModal.classList.add('hidden'));
+            function renderAnalytics() {
+                const container = document.getElementById('analytics-container');
+                const analyticsData = masterData.analytics;
+                const clientIds = Object.keys(analyticsData);
+                if (clientIds.length === 0) { container.innerHTML = '<p class="text-gray-500">No client feedback sessions recorded yet.</p>'; return; }
+                container.innerHTML = clientIds.map(clientId => {
+                    const session = analyticsData[clientId];
+                    const contactInfo = session.contact ? `<p class="font-bold text-lg text-green-400">${session.contact.name} - ${session.contact.phone}</p>` : `<p class="font-bold text-lg text-yellow-400">Anonymous User</p>`;
+                    const feedbackEntries = Object.entries(session.feedback);
+                    return `<details class="bg-gray-800 p-4 rounded-lg open:ring-1 open:ring-blue-500"><summary class="cursor-pointer">${contactInfo}<p class="text-xs text-gray-400">ID: ${clientId.substring(0, 8)}... | Feedback on ${feedbackEntries.length} posts</p></summary><div class="mt-4 pt-4 border-t border-gray-700 space-y-3">${feedbackEntries.length > 0 ? feedbackEntries.map(([postId, feedback]) => { const post = masterData.posts.find(p => p.id == postId); if (!post) return ''; return `<div class="p-2 bg-gray-700/50 rounded-md"><p class="text-sm"><strong>Post #${postId}:</strong> "${post.caption.substring(0, 30)}..."</p>${feedback.status === 'approved' ? `<p class="text-green-400 font-semibold">✔ Approved</p>` : ''}${feedback.status === 'disapproved' ? `<p class="text-red-400 font-semibold">✖ Disapproved</p><p class="text-sm text-gray-300 pl-4 border-l-2 border-red-400/50 ml-1 mt-1 italic">"${feedback.comment}"</p>` : ''}</div>`; }).join('') : '<p class="text-gray-500">No feedback given in this session.</p>'}</div></details>`;
+                }).join('');
+            }
+
+            // --- App Initialization ---
+            loadMasterData();
+            initializeSession();
+            updateAllUI();
+        });
+    </script>
+</body>
+</html>
+
